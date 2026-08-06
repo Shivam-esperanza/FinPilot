@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:FinPilot.Models"
+             x:Class="FinPilot.Views.PurchaseAdvisorPage"
+             Title="Smart Purchase Advisor"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="25" MaximumWidthRequest="500" HorizontalOptions="CenterAndExpand">
+
+            <!-- Input Form Box -->
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="What are you buying?" FontAttributes="Bold" FontSize="14"/>
+                    <Entry x:Name="ProductEntry" Placeholder="e.g. MacBook Air M4" Text="MacBook Air M4"/>
+
+                    <Label Text="Product Price (₹)" FontAttributes="Bold" FontSize="14"/>
+                    <Entry x:Name="PriceEntry" Placeholder="e.g. 120000" Keyboard="Numeric" Text="120000"/>
+
+                    <Button Text="Analyze Best Financing Path" Clicked="OnAnalyzeClicked" Margin="0,10,0,0"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Results Output Grid -->
+            <Label Text="Ranked Financing Recommendations" FontSize="16" FontAttributes="Bold"/>
+            <CollectionView x:Name="ResultsCollection">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AdvisorOption">
+                        <Border StrokeShape="RoundRectangle 12" Margin="0,0,0,15" Padding="15" Stroke="#10B981" BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#0F172A}">
+                            <VerticalStackLayout Spacing="8">
+                                <Grid ColumnDefinitions="*,*">
+                                    <Label Grid.Column="0" Text="{Binding BankName}" FontAttributes="Bold" FontSize="18" TextColor="#3B82F6"/>
+                                    <!-- Display calculated match score out of 100 -->
+                                    <Label Grid.Column="1" Text="{Binding MatchScore, StringFormat='{0}% Match'}" FontAttributes="Bold" HorizontalOptions="End" TextColor="#10B981"/>
+                                </Grid>
+
+                                <Label Text="{Binding RecommendationReason}" FontSize="13" TextColor="Gray"/>
+
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="4" Margin="0,5,0,0">
+                                    <Label Grid.Row="0" Grid.Column="0" Text="Monthly EMI:" FontSize="12" TextColor="Gray"/>
+                                    <Label Grid.Row="0" Grid.Column="1" Text="{Binding MonthlyEmi, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End"/>
+
+                                    <Label Grid.Row="1" Grid.Column="0" Text="Net Out-of-Pocket Cost:" FontSize="12" TextColor="Gray"/>
+                                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding NetEffectiveCost, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End" TextColor="#EF4444"/>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             x:Class="FinPilot.Views.LoginPage"
+             x:DataType="viewmodels:LoginViewModel"
+             Title="Welcome to FinPilot"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView VerticalOptions="Center">
+        <VerticalStackLayout Spacing="20" Padding="30" MaximumWidthRequest="400" HorizontalOptions="Center">
+
+            <!-- Branding Header -->
+            <Label Text="FinPilot" 
+                   FontSize="36" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#512BD4"/>
+
+            <Label Text="Your AI Personal Financial Assistant" 
+                   FontSize="16" 
+                   HorizontalOptions="Center" 
+                   TextColor="#808080"
+                   Margin="0,0,0,20"/>
+
+            <!-- Form Entries -->
+            <Entry Placeholder="Email Address"
+                   Text="{Binding Email, Mode=TwoWay}"
+                   Keyboard="Email"
+                   Margin="0,5"
+                   TextColor="#000000"
+                   PlaceholderColor="#808080"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Password"
+                   Text="{Binding Password, Mode=TwoWay}"
+                   IsPassword="True"
+                   Margin="0,5"
+                   TextColor="#000000"
+                   PlaceholderColor="#808080"
+                   BackgroundColor="#F1F5F9"/>
+
+            <!-- Zero-Dependency Text Verification Banner -->
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="#FF0000"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Login Action Button -->
+            <Button Text="Login with Email"
+                    Command="{Binding LoginWithEmailCommand}"
+                    HeightRequest="50"
+                    Margin="0,15,0,0"
+                    BackgroundColor="#512BD4"
+                    TextColor="#FFFFFF"/>
+
+            <!-- Visual Progress Loader -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               Color="#512BD4"
+                               HorizontalOptions="Center"
+                               HeightRequest="40"
+                               WidthRequest="40"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
