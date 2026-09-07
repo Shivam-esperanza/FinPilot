@@ -28,19 +28,19 @@
                    Text="{Binding Email, Mode=TwoWay}"
                    Keyboard="Email"
                    Margin="0,5"
-                   TextColor="#000000"
-                   PlaceholderColor="#808080"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
                    BackgroundColor="#F1F5F9"/>
 
             <Entry Placeholder="Password"
                    Text="{Binding Password, Mode=TwoWay}"
                    IsPassword="True"
                    Margin="0,5"
-                   TextColor="#000000"
-                   PlaceholderColor="#808080"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
                    BackgroundColor="#F1F5F9"/>
 
-            <!-- Zero-Dependency Text Verification Banner -->
+            <!-- Error Banner -->
             <Label Text="{Binding ErrorMessage}"
                    TextColor="#FF0000"
                    FontSize="14"
@@ -54,6 +54,13 @@
                     Margin="0,15,0,0"
                     BackgroundColor="#512BD4"
                     TextColor="#FFFFFF"/>
+
+            <!-- Register Navigation Link -->
+            <Button Text="Don't have an account? Create Account"
+                    Command="{Binding NavigateToRegisterCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#512BD4"
+                    FontSize="14"/>
 
             <!-- Visual Progress Loader -->
             <ActivityIndicator IsRunning="{Binding IsBusy}"

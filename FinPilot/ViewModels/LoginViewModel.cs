@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FinPilot.Interfaces;
 using System;
@@ -50,24 +50,10 @@ namespace FinPilot.ViewModels
                     return;
                 }
 
-                // 1. Instantly pull and resolve the next target platform layout straight out of DI containers
                 var dashboardPage = App.Current?.Windows[0].Page?.Handler?.MauiContext?.Services.GetService<Views.DashboardPage>();
-                var dashboardViewModel = App.Current?.Windows[0].Page?.Handler?.MauiContext?.Services.GetService<DashboardViewModel>();
-
-                if (dashboardPage != null && dashboardViewModel != null)
+                if (dashboardPage != null && App.Current?.Windows[0].Page is NavigationPage navPage)
                 {
-                    // 2. Initialize the viewmodel state machine profile with our matching database entry key
-                    dashboardViewModel.Initialize(user.Id);
-                    dashboardPage.BindingContext = dashboardViewModel;
-
-                    // 3. Dispatch the load operations asynchronous command immediately
-                    _ = dashboardViewModel.LoadDashboardDataAsync();
-
-                    // 4. Wipe out login screens and transition view roots securely
-                    if (App.Current?.Windows[0].Page is NavigationPage navPage)
-                    {
-                        await navPage.PushAsync(dashboardPage);
-                    }
+                    await navPage.PushAsync(dashboardPage);
                 }
 
                 System.Diagnostics.Debug.WriteLine($"Login successful! Welcome: {user.FullName}");
@@ -79,6 +65,16 @@ namespace FinPilot.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        [RelayCommand]
+        private async Task NavigateToRegisterAsync()
+        {
+            var registerPage = App.Current?.Windows[0].Page?.Handler?.MauiContext?.Services.GetService<Views.RegisterPage>();
+            if (registerPage != null && App.Current?.Windows[0].Page is NavigationPage navPage)
+            {
+                await navPage.PushAsync(registerPage);
             }
         }
     }

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             xmlns:models="clr-namespace:FinPilot.Models"
+             x:Class="FinPilot.Views.AccountsPage"
+             x:DataType="viewmodels:AccountsViewModel"
+             Title="My Bank Accounts"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20" MaximumWidthRequest="600" HorizontalOptions="Center">
+
+            <!-- Title Header -->
+            <Label Text="Bank Accounts" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+
+            <!-- Add Account Form Card -->
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Add New Bank Account" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+
+                    <Picker Title="Select Bank"
+                            ItemsSource="{Binding Banks}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedBank, Mode=TwoWay}"
+                            TitleColor="#64748B"
+                            TextColor="#1E293B"
+                            BackgroundColor="#F1F5F9"/>
+
+                    <Entry Placeholder="Account Number" Text="{Binding AccountNumber, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Account Type (e.g., Savings, Salary)" Text="{Binding AccountType, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Current Balance (₹)" Text="{Binding BalanceText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <CheckBox IsChecked="{Binding IsPrimaryRelationship, Mode=TwoWay}"/>
+                        <Label Text="Primary Relationship Account" VerticalOptions="Center" TextColor="#475569"/>
+                    </HorizontalStackLayout>
+
+                    <Button Text="Add Account" Command="{Binding AddAccountCommand}" BackgroundColor="#512BD4" TextColor="#FFFFFF"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error Banner -->
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+
+            <!-- Accounts List -->
+            <Label Text="Linked Accounts" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
+
+            <CollectionView ItemsSource="{Binding Accounts}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Account">
+                        <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Bank.Name, FallbackValue='Bank Account'}" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+                                    <Label Text="{Binding AccountNumber, StringFormat='A/C: {0}'}" FontSize="14" TextColor="#64748B"/>
+                                    <Label Text="{Binding AccountType}" FontSize="12" TextColor="#94A3B8"/>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="0,0,15,0">
+                                    <Label Text="{Binding Balance, StringFormat='₹{0:N2}'}" FontAttributes="Bold" FontSize="16" TextColor="#10B981" HorizontalOptions="End"/>
+                                </VerticalStackLayout>
+
+                                <Button Grid.Column="2" Text="Delete"
+                                        Command="{Binding BindingContext.DeleteAccountCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="36" Padding="10,0"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

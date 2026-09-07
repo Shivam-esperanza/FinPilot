@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FinPilot.Models;
@@ -12,6 +12,9 @@ namespace FinPilot.Interfaces
 
         // Standard corporate email identity authentication routine
         Task<User?> LoginWithEmailAsync(string email, string password);
+
+        // Standard user registration with email identity and financial parameters
+        Task<User?> RegisterWithEmailAsync(string fullName, string email, string password, string phoneNumber = "", decimal monthlyIncome = 0, int creditScore = 750);
 
         // Third-party identity broker authentication routine
         Task<User?> LoginWithGoogleAsync(string idToken);

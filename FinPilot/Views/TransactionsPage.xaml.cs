@@ -3,11 +3,11 @@ using FinPilot.ViewModels;
 
 namespace FinPilot.Views
 {
-    public partial class DashboardPage : ContentPage
+    public partial class TransactionsPage : ContentPage
     {
-        private readonly DashboardViewModel _viewModel;
+        private readonly TransactionsViewModel _viewModel;
 
-        public DashboardPage(DashboardViewModel viewModel)
+        public TransactionsPage(TransactionsViewModel viewModel)
         {
             InitializeComponent();
             _viewModel = viewModel;
@@ -17,7 +17,7 @@ namespace FinPilot.Views
         protected override async void OnAppearing()
         {
             base.OnAppearing();
-            await _viewModel.LoadDashboardDataAsync();
+            await _viewModel.LoadTransactionsAsync();
         }
     }
 }

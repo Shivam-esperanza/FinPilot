@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Collections.Generic;
@@ -23,7 +23,9 @@ namespace FinPilot.Services
 
         public async Task RunBackgroundAuditAsync(Guid userId)
         {
-            DateTime today = DateTime.UtcNow;
+            DateTime todayDate = DateTime.UtcNow.Date;
+            DateTime tomorrowDate = todayDate.AddDays(1);
+            DateTime nowUtc = DateTime.UtcNow;
             bool alertsGenerated = false;
 
             // 1. AUDIT TYPE A: Scan for near-term Loan EMIs (Feature 8)
@@ -33,25 +35,26 @@ namespace FinPilot.Services
 
             foreach (var loan in upcomingLoans)
             {
-                int daysToEmi = (loan.NextEmiDate.Date - today.Date).Days;
+                int daysToEmi = (loan.NextEmiDate.Date - todayDate).Days;
 
                 // Trigger alert precisely if the loan payment date is tomorrow (1 day away)
                 if (daysToEmi == 1)
                 {
                     bool alertExists = await _dbContext.Notifications.AnyAsync(n =>
-                        n.UserId == userId && n.Type == "EmiReminder" && n.CreatedAt.Date == today.Date);
+                        n.UserId == userId && n.Type == "EmiReminder" && n.CreatedAt >= todayDate && n.CreatedAt < tomorrowDate);
 
                     if (!alertExists)
                     {
+                        string loanNo = !string.IsNullOrWhiteSpace(loan.LoanNumber) ? loan.LoanNumber : "Loan";
                         await _dbContext.Notifications.AddAsync(new Notification
                         {
                             Id = Guid.NewGuid(),
                             UserId = userId,
                             Title = "Loan EMI Due Tomorrow",
-                            Message = $"Your monthly EMI of ₹{loan.MonthlyEmi:N2} for loan {loan.LoanNumber} will be auto-debited tomorrow.",
+                            Message = $"Your monthly EMI of ₹{loan.MonthlyEmi:N2} for loan {loanNo} will be auto-debited tomorrow.",
                             Type = "EmiReminder",
                             IsRead = false,
-                            CreatedAt = today
+                            CreatedAt = nowUtc
                         });
                         alertsGenerated = true;
                     }
@@ -59,14 +62,16 @@ namespace FinPilot.Services
             }
 
             // 2. AUDIT TYPE B: Scan for Credit Card Utilization Violations (Feature 4 & 8)
-            var activeCards = await _dbContext.CreditCards.Include(c=>c.Bank).Where(c => c.UserId == userId).ToListAsync();
+            var activeCards = await _dbContext.CreditCards.Include(c => c.Bank).Where(c => c.UserId == userId).ToListAsync();
             foreach (var card in activeCards)
             {
                 // Trigger alert if card utilization crosses the strict 30% threshold
                 if (card.CreditUtilizationPercentage > 30.0)
                 {
+                    string lastDigits = card.LastFourDigits ?? string.Empty;
                     bool alertExists = await _dbContext.Notifications.AnyAsync(n =>
-                        n.UserId == userId && n.Type == "CardDue" && n.Message.Contains(card.LastFourDigits) && n.CreatedAt.Date == today.Date);
+                        n.UserId == userId && n.Type == "CardDue" && n.CreatedAt >= todayDate && n.CreatedAt < tomorrowDate &&
+                        (string.IsNullOrEmpty(lastDigits) || (n.Message != null && n.Message.Contains(lastDigits))));
 
                     if (!alertExists)
                     {
@@ -75,10 +80,10 @@ namespace FinPilot.Services
                             Id = Guid.NewGuid(),
                             UserId = userId,
                             Title = "High Credit Utilization Warning",
-                            Message = $"Your card ending in {card.LastFourDigits} has crossed a 30% utilization ratio (Current: {card.CreditUtilizationPercentage:F1}%). This may negatively affect your credit score.",
+                            Message = $"Your card ending in {lastDigits} has crossed a 30% utilization ratio (Current: {card.CreditUtilizationPercentage:F1}%). This may negatively affect your credit score.",
                             Type = "CardDue",
                             IsRead = false,
-                            CreatedAt = today
+                            CreatedAt = nowUtc
                         });
                         alertsGenerated = true;
                     }
@@ -96,16 +101,17 @@ namespace FinPilot.Services
 
                     if (!alertExists)
                     {
+                        string loanNo = !string.IsNullOrWhiteSpace(loan.LoanNumber) ? loan.LoanNumber : "Loan";
                         decimal simulatedSavings = loan.RemainingPrincipal * 0.02m; // Predict roughly 2% savings profile index
                         await _dbContext.Notifications.AddAsync(new Notification
                         {
                             Id = Guid.NewGuid(),
                             UserId = userId,
                             Title = "Refinance Optimization Available",
-                            Message = $"Smart Check: You can potentially save up to ₹{simulatedSavings:N0} by refinancing your loan {loan.LoanNumber} to a lower interest partner framework.",
+                            Message = $"Smart Check: You can potentially save up to ₹{simulatedSavings:N0} by refinancing your loan {loanNo} to a lower interest partner framework.",
                             Type = "OfferAlert",
                             IsRead = false,
-                            CreatedAt = today
+                            CreatedAt = nowUtc
                         });
                         alertsGenerated = true;
                     }

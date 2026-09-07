@@ -1,40 +1,67 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.CreditCardManagerPage"
+             x:DataType="viewmodels:CreditCardManagerViewModel"
              Title="Credit Card Manager"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+             BackgroundColor="#FFFFFF">
 
     <ScrollView Padding="20">
-        <VerticalStackLayout Spacing="20" MaximumWidthRequest="500" HorizontalOptions="CenterAndExpand">
+        <VerticalStackLayout Spacing="20" MaximumWidthRequest="550" HorizontalOptions="Center">
 
-            <Label Text="Your Active Credit Lines" FontSize="20" FontAttributes="Bold" Margin="0,0,0,10"
-                   TextColor="{AppThemeBinding Light=#1E293B, Dark=#F1F5F9}"/>
+            <Label Text="Credit Card Manager" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
 
-            <!-- CollectionView to iterate and build cards dynamically -->
-            <CollectionView x:Name="CardsCollection" SelectionMode="None">
+            <!-- Add Card Form -->
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Add New Credit Card" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+
+                    <Picker Title="Select Bank"
+                            ItemsSource="{Binding Banks}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedBank, Mode=TwoWay}"
+                            TitleColor="#64748B"
+                            TextColor="#1E293B"
+                            BackgroundColor="#F1F5F9"/>
+
+                    <Entry Placeholder="Card Name (e.g., Regalia, Rubyx)" Text="{Binding CardName, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Last 4 Digits" Text="{Binding LastFourDigits, Mode=TwoWay}" Keyboard="Numeric" MaxLength="4" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Total Credit Limit (₹)" Text="{Binding CreditLimitText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Current Outstanding Amount (₹)" Text="{Binding OutstandingAmountText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <Label Text="Payment Due Date" FontSize="12" TextColor="#64748B"/>
+                    <DatePicker Date="{Binding DueDate, Mode=TwoWay}" TextColor="#1E293B" BackgroundColor="#F1F5F9"/>
+
+                    <Button Text="Add Credit Card" Command="{Binding AddCardCommand}" BackgroundColor="#512BD4" TextColor="#FFFFFF"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error Banner -->
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+
+            <Label Text="Your Active Credit Cards" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
+
+            <!-- Cards Collection -->
+            <CollectionView ItemsSource="{Binding Cards}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="models:CreditCard">
-                        <Border StrokeShape="RoundRectangle 12" Margin="0,0,0,15" Padding="20" 
-                                BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
+                        <Border StrokeShape="RoundRectangle 12" Margin="0,0,0,15" Padding="20" BackgroundColor="#F8FAFC">
                             <VerticalStackLayout Spacing="12">
 
-                                <!-- Card Header details -->
-                                <Grid ColumnDefinitions="*,*">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                        <Label Text="{Binding CardName}" FontSize="18" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1E293B, Dark=#F1F5F9}"/>
-                                        <Label Text="{Binding Bank.Name}" FontSize="12" TextColor="Gray"/>
+                                        <Label Text="{Binding CardName}" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
+                                        <Label Text="{Binding Bank.Name, FallbackValue='Bank'}" FontSize="12" TextColor="Gray"/>
                                     </VerticalStackLayout>
-                                    <Label Grid.Column="1" Text="{Binding LastFourDigits, StringFormat='•••• {0}'}" 
-                                           HorizontalOptions="End" VerticalOptions="Start" FontSize="14" TextColor="Gray"/>
+                                    <Label Grid.Column="1" Text="{Binding LastFourDigits, StringFormat='•••• {0}'}" FontSize="14" TextColor="Gray" Margin="0,0,10,0"/>
+                                    <Button Grid.Column="2" Text="Delete"
+                                            Command="{Binding BindingContext.DeleteCardCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="32" Padding="8,0"/>
                                 </Grid>
 
-                                <!-- Visual Utilization Indicator Line -->
-                                <ProgressBar Progress="{Binding CreditUtilizationPercentage, Converter={StaticResource InvertedBoolConverter}}" 
-                                             ProgressColor="{AppThemeBinding Light=#3B82F6, Dark=#60A5FA}" HeightRequest="6"/>
-
-                                <!-- Financial Metrics Sub-Grid -->
                                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" RowSpacing="6">
                                     <Label Grid.Row="0" Grid.Column="0" Text="Outstanding Balance" FontSize="12" TextColor="Gray"/>
                                     <Label Grid.Row="0" Grid.Column="1" Text="{Binding OutstandingAmount, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End" TextColor="#EF4444"/>
@@ -43,12 +70,11 @@
                                     <Label Grid.Row="1" Grid.Column="1" Text="{Binding AvailableLimit, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End" TextColor="#10B981"/>
                                 </Grid>
 
-                                <!-- Footer Billing Cycles -->
-                                <Border StrokeShape="RoundRectangle 4" Padding="10" BackgroundColor="{AppThemeBinding Light=#F1F5F9, Dark=#0F172A}">
+                                <Border StrokeShape="RoundRectangle 4" Padding="10" BackgroundColor="#F1F5F9">
                                     <Grid ColumnDefinitions="*,*">
                                         <HorizontalStackLayout Grid.Column="0" Spacing="4">
                                             <Label Text="Utilization:" FontSize="11" TextColor="Gray"/>
-                                            <Label Text="{Binding CreditUtilizationPercentage, StringFormat='{0:F1}%'}" FontSize="11" FontAttributes="Bold"/>
+                                            <Label Text="{Binding CreditUtilizationPercentage, StringFormat='{0:F1}%'}" FontSize="11" FontAttributes="Bold" TextColor="#F59E0B"/>
                                         </HorizontalStackLayout>
                                         <Label Grid.Column="1" Text="{Binding DueDate, StringFormat='Due: {0:dd MMM yyyy}'}" FontSize="11" HorizontalOptions="End" TextColor="#F59E0B"/>
                                     </Grid>

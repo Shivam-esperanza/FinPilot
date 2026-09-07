@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             x:Class="FinPilot.Views.RegisterPage"
+             x:DataType="viewmodels:RegisterViewModel"
+             Title="Create Account"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView VerticalOptions="Center">
+        <VerticalStackLayout Spacing="15" Padding="30" MaximumWidthRequest="420" HorizontalOptions="Center">
+
+            <!-- Header -->
+            <Label Text="Create Account" 
+                   FontSize="30" 
+                   FontAttributes="Bold" 
+                   HorizontalOptions="Center" 
+                   TextColor="#512BD4"/>
+
+            <Label Text="Join FinPilot to manage your personal finances" 
+                   FontSize="14" 
+                   HorizontalOptions="Center" 
+                   TextColor="#808080"
+                   Margin="0,0,0,15"/>
+
+            <!-- Form Entries -->
+            <Entry Placeholder="Full Name *"
+                   Text="{Binding FullName, Mode=TwoWay}"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Email Address *"
+                   Text="{Binding Email, Mode=TwoWay}"
+                   Keyboard="Email"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Password (min 6 chars) *"
+                   Text="{Binding Password, Mode=TwoWay}"
+                   IsPassword="True"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Confirm Password *"
+                   Text="{Binding ConfirmPassword, Mode=TwoWay}"
+                   IsPassword="True"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Phone Number (10 digits)"
+                   Text="{Binding PhoneNumber, Mode=TwoWay}"
+                   Keyboard="Telephone"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Monthly Income (₹)"
+                   Text="{Binding MonthlyIncomeText, Mode=TwoWay}"
+                   Keyboard="Numeric"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <Entry Placeholder="Credit Score (300 - 900)"
+                   Text="{Binding CreditScoreText, Mode=TwoWay}"
+                   Keyboard="Numeric"
+                   Margin="0,3"
+                   TextColor="#1E293B"
+                   PlaceholderColor="#64748B"
+                   BackgroundColor="#F1F5F9"/>
+
+            <!-- Feedback Labels -->
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="#FF0000"
+                   FontSize="14"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <Label Text="{Binding SuccessMessage}"
+                   TextColor="#008000"
+                   FontSize="14"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- Register Action Button -->
+            <Button Text="Register"
+                    Command="{Binding RegisterCommand}"
+                    HeightRequest="50"
+                    Margin="0,10,0,0"
+                    BackgroundColor="#512BD4"
+                    TextColor="#FFFFFF"/>
+
+            <!-- Navigation Back to Login -->
+            <Button Text="Already have an account? Login"
+                    Command="{Binding NavigateToLoginCommand}"
+                    BackgroundColor="Transparent"
+                    TextColor="#512BD4"
+                    FontSize="14"/>
+
+            <!-- Visual Loader -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               Color="#512BD4"
+                               HorizontalOptions="Center"
+                               HeightRequest="40"
+                               WidthRequest="40"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

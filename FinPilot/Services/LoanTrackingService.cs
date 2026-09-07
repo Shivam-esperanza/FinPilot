@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using FinPilot.Database;
 using FinPilot.Interfaces;
 using FinPilot.Models;
-using FinPilot.Database;
 
 namespace FinPilot.Services
 {
@@ -19,10 +18,67 @@ namespace FinPilot.Services
             _dbContext = dbContext;
         }
 
+        public async Task<List<Loan>> GetUserLoansAsync(Guid userId)
+        {
+            return await _dbContext.Loans
+                .Include(l => l.Bank)
+                .Where(l => l.UserId == userId)
+                .ToListAsync();
+        }
+
+        public async Task<Loan> AddLoanAsync(Loan loan)
+        {
+            if (loan == null) throw new ArgumentNullException(nameof(loan));
+            if (loan.Id == Guid.Empty) loan.Id = Guid.NewGuid();
+
+            if (loan.TotalLoanAmount < 0 || loan.RemainingPrincipal < 0 || loan.MonthlyEmi < 0)
+            {
+                throw new ArgumentException("Loan financial amounts cannot be negative.");
+            }
+
+            await _dbContext.Loans.AddAsync(loan);
+            await _dbContext.SaveChangesAsync();
+            return loan;
+        }
+
+        public async Task<Loan> UpdateLoanAsync(Loan loan)
+        {
+            if (loan == null) throw new ArgumentNullException(nameof(loan));
+
+            var existing = await _dbContext.Loans.FirstOrDefaultAsync(l => l.Id == loan.Id && l.UserId == loan.UserId);
+            if (existing == null) throw new InvalidOperationException("Loan not found.");
+
+            existing.LoanNumber = loan.LoanNumber;
+            existing.LoanType = loan.LoanType;
+            existing.TotalLoanAmount = loan.TotalLoanAmount;
+            existing.RemainingPrincipal = loan.RemainingPrincipal;
+            existing.InterestRate = loan.InterestRate;
+            existing.TotalTenureMonths = loan.TotalTenureMonths;
+            existing.RemainingTenureMonths = loan.RemainingTenureMonths;
+            existing.MonthlyEmi = loan.MonthlyEmi;
+            existing.NextEmiDate = loan.NextEmiDate;
+            existing.BankId = loan.BankId;
+            existing.LastModifiedAt = DateTime.UtcNow;
+
+            _dbContext.Loans.Update(existing);
+            await _dbContext.SaveChangesAsync();
+            return existing;
+        }
+
+        public async Task<bool> DeleteLoanAsync(Guid loanId, Guid userId)
+        {
+            var loan = await _dbContext.Loans.FirstOrDefaultAsync(l => l.Id == loanId && l.UserId == userId);
+            if (loan == null) return false;
+
+            _dbContext.Loans.Remove(loan);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
         public async Task AutoUpdateBalancesAsync(Guid userId)
         {
-            // 1. Gather all active liabilities linked to the profile
-            var activeLoans = await _dbContext.Loans.Include(c=>c.Bank)
+            var activeLoans = await _dbContext.Loans
+                .Include(c => c.Bank)
                 .Where(l => l.UserId == userId && l.RemainingPrincipal > 0)
                 .ToListAsync();
 
@@ -33,33 +89,21 @@ namespace FinPilot.Services
 
             foreach (var loan in activeLoans)
             {
-                // 2. Identify target milestones based on expected monthly boundaries
-                // We use NextEmiDate minus 1 month as our baseline anchor point for calculation comparison
-                DateTime baselineAnchor = loan.NextEmiDate.AddMonths(-1);
-
                 int elapsedMonths = 0;
-
-                // Track how many months have rolled past since our baseline caught up
                 while (currentDate >= loan.NextEmiDate)
                 {
                     elapsedMonths++;
                     loan.NextEmiDate = loan.NextEmiDate.AddMonths(1);
                 }
 
-                // 3. If months have rolled past while away, process the compounding decay matrix
                 if (elapsedMonths > 0)
                 {
                     dataMutated = true;
-
                     for (int i = 0; i < elapsedMonths; i++)
                     {
                         if (loan.RemainingPrincipal <= 0) break;
 
-                        // Reducing-balance banking formula math:
-                        // Monthly Interest Component = Current Outstanding Principal * (Annual Rate / 12 months / 100)
                         decimal monthlyInterestDrag = loan.RemainingPrincipal * (loan.InterestRate / 12m / 100m);
-
-                        // Principal Component portion = Flat Monthly EMI paid - calculated interest penalty drag
                         decimal principalComponentPaid = loan.MonthlyEmi - monthlyInterestDrag;
 
                         if (principalComponentPaid > loan.RemainingPrincipal)
@@ -67,12 +111,10 @@ namespace FinPilot.Services
                             principalComponentPaid = loan.RemainingPrincipal;
                         }
 
-                        // Decay outstanding parameters down the tree
                         loan.RemainingPrincipal -= principalComponentPaid;
                         loan.RemainingTenureMonths--;
                     }
 
-                    // 4. Record historical financial transaction markers inside our database ledger
                     var autoTransaction = new Transaction
                     {
                         Id = Guid.NewGuid(),
@@ -88,7 +130,6 @@ namespace FinPilot.Services
                 }
             }
 
-            // 5. Commit mutations safely to our physical SQLite file structure
             if (dataMutated)
             {
                 await _dbContext.SaveChangesAsync();

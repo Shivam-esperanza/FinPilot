@@ -1,9 +1,10 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using FinPilot.Database;
 using FinPilot.Interfaces;
 using FinPilot.Services;
-using FinPilot.Views;
 using FinPilot.ViewModels;
+using FinPilot.Views;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,22 +24,49 @@ namespace FinPilot
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-            builder.Services.AddDbContext<AppDbContext>();
-            builder.Services.AddScoped<IAuthenticationService, MockAuthService>();
-            builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+            // Database Context (Transient to allow independent DbContext instances per page/service in MAUI)
+            builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Transient);
+
+            // Core Application Services & Interfaces
+            builder.Services.AddSingleton<IUserSessionService, UserSessionService>();
+            builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
+            builder.Services.AddTransient<IAccountService, AccountService>();
+            builder.Services.AddTransient<ICreditCardService, CreditCardService>();
+            builder.Services.AddTransient<ILoanTrackingService, LoanTrackingService>();
+            builder.Services.AddTransient<ITransactionService, TransactionService>();
+            builder.Services.AddTransient<IDashboardService, DashboardService>();
+            builder.Services.AddTransient<IBankOfferService, BankOfferService>();
+            builder.Services.AddTransient<IRecommendationEngine, RecommendationEngine>();
+            builder.Services.AddTransient<IAssistantService, AssistantService>();
+            builder.Services.AddTransient<INotificationManagerService, NotificationManagerService>();
+            builder.Services.AddTransient<ISyncRepository, CloudSyncRepository>();
+
+            // ViewModels
             builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<RegisterViewModel>();
             builder.Services.AddTransient<DashboardViewModel>();
-            builder.Services.AddScoped<ILoanTrackingService, LoanTrackingService>();
-            builder.Services.AddScoped<ICreditCardService, CreditCardService>();
-            builder.Services.AddScoped<INotificationManagerService, NotificationManagerService>();
+            builder.Services.AddTransient<AccountsViewModel>();
+            builder.Services.AddTransient<CreditCardManagerViewModel>();
+            builder.Services.AddTransient<LoansViewModel>();
+            builder.Services.AddTransient<TransactionsViewModel>();
+            builder.Services.AddTransient<PurchaseAdvisorViewModel>();
+            builder.Services.AddTransient<BankOffersViewModel>();
+            builder.Services.AddTransient<NotificationsViewModel>();
+            builder.Services.AddTransient<ProfileViewModel>();
+
+            // Views
             builder.Services.AddTransient<LoginPage>();
-            builder.Services.AddTransient<Views.DashboardPage>();
-            builder.Services.AddScoped<IBankOfferService, BankOfferService>();
-            builder.Services.AddScoped<IRecommendationEngine, RecommendationEngine>();
-            builder.Services.AddScoped<INotificationManagerService, NotificationManagerService>();
-            builder.Services.AddScoped<ISyncRepository, CloudSyncRepository>();
-
-
+            builder.Services.AddTransient<RegisterPage>();
+            builder.Services.AddTransient<DashboardPage>();
+            builder.Services.AddTransient<AccountsPage>();
+            builder.Services.AddTransient<CreditCardManagerPage>();
+            builder.Services.AddTransient<LoansPage>();
+            builder.Services.AddTransient<TransactionsPage>();
+            builder.Services.AddTransient<PurchaseAdvisorPage>();
+            builder.Services.AddTransient<BankOffersPage>();
+            builder.Services.AddTransient<NotificationsPage>();
+            builder.Services.AddTransient<ProfilePage>();
 
 #if DEBUG
             builder.Logging.AddDebug();
@@ -57,6 +85,16 @@ namespace FinPilot
                 var services = scope.ServiceProvider;
                 var context = services.GetRequiredService<AppDbContext>();
                 context.Database.EnsureCreated();
+
+                // Self-healing migration for existing databases missing the PasswordHash column
+                try
+                {
+                    context.Database.ExecuteSqlRaw("ALTER TABLE Users ADD COLUMN PasswordHash TEXT NOT NULL DEFAULT '';");
+                }
+                catch
+                {
+                    // Column already exists or table created cleanly by EnsureCreated
+                }
             }
             catch (Exception ex)
             {

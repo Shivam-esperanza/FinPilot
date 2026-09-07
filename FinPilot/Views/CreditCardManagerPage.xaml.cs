@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.Maui.Controls;
-using FinPilot.Models;
+using FinPilot.ViewModels;
 
 namespace FinPilot.Views
 {
     public partial class CreditCardManagerPage : ContentPage
     {
-        public CreditCardManagerPage(List<CreditCard> userCards)
+        private readonly CreditCardManagerViewModel _viewModel;
+
+        public CreditCardManagerPage(CreditCardManagerViewModel viewModel)
         {
             InitializeComponent();
+            _viewModel = viewModel;
+            BindingContext = _viewModel;
+        }
 
-            // Assigning data collection items directly to our compiled list frame elements
-            CardsCollection.ItemsSource = userCards;
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await _viewModel.LoadCardsAsync();
         }
     }
 }

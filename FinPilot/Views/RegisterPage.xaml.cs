@@ -3,9 +3,9 @@ using FinPilot.ViewModels;
 
 namespace FinPilot.Views
 {
-    public partial class PurchaseAdvisorPage : ContentPage
+    public partial class RegisterPage : ContentPage
     {
-        public PurchaseAdvisorPage(PurchaseAdvisorViewModel viewModel)
+        public RegisterPage(RegisterViewModel viewModel)
         {
             InitializeComponent();
             BindingContext = viewModel;

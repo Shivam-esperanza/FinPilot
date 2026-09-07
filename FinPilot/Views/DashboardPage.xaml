@@ -1,101 +1,96 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
     x:Class="FinPilot.Views.DashboardPage"
     x:DataType="viewmodels:DashboardViewModel"
-    Title="Financial Command Center"
+    Title="FinPilot Command Center"
     NavigationPage.HasBackButton="False"
-             BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#000000}">
+    BackgroundColor="#FFFFFF">
 
-    <!-- Pull-to-Refresh Component for Native Synchronization -->
-    <RefreshView IsRefreshing="{Binding IsRefreshing}" 
-                 Command="{Binding LoadDashboardDataCommand}">
-
+    <RefreshView IsRefreshing="{Binding IsRefreshing}" Command="{Binding LoadDashboardDataCommand}">
         <ScrollView Padding="20">
-            <VerticalStackLayout Spacing="25" MaximumWidthRequest="600" HorizontalOptions="CenterAndExpand">
+            <VerticalStackLayout Spacing="20" MaximumWidthRequest="600" HorizontalOptions="Center">
 
-                <!-- Action Button for Smart Purchase Advisor Integration -->
-                <Button Text="Open Smart Purchase Advisor" Clicked="OnOpenAdvisorClicked" Margin="0,10,0,0"/>
+                <!-- Header Greeting -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="{Binding Summary.UserName, StringFormat='Welcome, {0}'}" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+                        <Label Text="Your AI Personal Financial Assistant" FontSize="13" TextColor="#64748B"/>
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Profile" Command="{Binding NavigateToProfileCommand}" BackgroundColor="#F1F5F9" TextColor="#512BD4" HeightRequest="36" Padding="10,0"/>
+                </Grid>
 
-                <!-- 1. Master Financial Health Summary Card -->
-                <Border StrokeShape="RoundRectangle 12" StrokeThickness="1" Padding="20" BackgroundColor="#1E293B">
-                    <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                <!-- Financial Health Score Card -->
+                <Border StrokeShape="RoundRectangle 12" Padding="20" BackgroundColor="#1E293B">
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                         <Label Text="FINANCIAL HEALTH SCORE" FontSize="12" FontAttributes="Bold" TextColor="#94A3B8" HorizontalOptions="Center"/>
-                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="5">
+                        <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
                             <Label Text="{Binding Summary.FinancialHealthScore}" FontSize="48" FontAttributes="Bold" TextColor="#10B981"/>
                             <Label Text="/100" FontSize="20" TextColor="#64748B" VerticalOptions="End" Margin="0,0,0,8"/>
                         </HorizontalStackLayout>
-                        <Label Text="Excellent Standing" FontSize="14" FontAttributes="Bold" TextColor="#F1F5F9" HorizontalOptions="Center"/>
+                        <Label Text="{Binding Summary.FinancialHealthStatus, StringFormat='Standing: {0}'}" FontSize="14" FontAttributes="Bold" TextColor="#F1F5F9" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- 2. Dual Parameter Grid (Credit Score & Budget Risk) -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <!-- Navigation Quick Actions Grid -->
+                <Label Text="Financial Management Modules" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
 
-                    <!-- Credit Rating Block -->
-                    <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
-                        <VerticalStackLayout Spacing="5">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <Button Grid.Row="0" Grid.Column="0" Text="🏦 My Accounts" Command="{Binding NavigateToAccountsCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+                    <Button Grid.Row="0" Grid.Column="1" Text="💳 Credit Cards" Command="{Binding NavigateToCardsCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+
+                    <Button Grid.Row="1" Grid.Column="0" Text="📉 Active Loans" Command="{Binding NavigateToLoansCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+                    <Button Grid.Row="1" Grid.Column="1" Text="💸 Transactions" Command="{Binding NavigateToTransactionsCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+
+                    <Button Grid.Row="2" Grid.Column="0" Text="💡 Purchase Advisor" Command="{Binding NavigateToAdvisorCommand}" BackgroundColor="#512BD4" TextColor="#FFFFFF" HeightRequest="50"/>
+                    <Button Grid.Row="2" Grid.Column="1" Text="🎁 Bank Offers" Command="{Binding NavigateToOffersCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+
+                    <Button Grid.Row="3" Grid.Column="0" Text="🔔 Notifications" Command="{Binding NavigateToNotificationsCommand}" BackgroundColor="#F1F5F9" TextColor="#1E293B" HeightRequest="50"/>
+                    <Button Grid.Row="3" Grid.Column="1" Text="🚪 Logout" Command="{Binding LogoutCommand}" BackgroundColor="#FEF2F2" TextColor="#EF4444" HeightRequest="50"/>
+                </Grid>
+
+                <!-- Parameter Grid (CIBIL & EMI Ratio) -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                    <Border Grid.Column="0" StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                        <VerticalStackLayout Spacing="4">
                             <Label Text="CIBIL Score" FontSize="12" TextColor="Gray"/>
-                            <Label Text="{Binding Summary.CreditScore}" FontSize="28" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1E293B, Dark=#F1F5F9}"/>
-                            <Label Text="Updated Today" FontSize="10" TextColor="DarkGray"/>
+                            <Label Text="{Binding Summary.CreditScore}" FontSize="26" FontAttributes="Bold" TextColor="#1E293B"/>
                         </VerticalStackLayout>
                     </Border>
 
-                    <!-- Monthly Debt Burden Block -->
-                    <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
-                        <VerticalStackLayout Spacing="5">
+                    <Border Grid.Column="1" StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                        <VerticalStackLayout Spacing="4">
                             <Label Text="EMI to Income" FontSize="12" TextColor="Gray"/>
-                            <HorizontalStackLayout Spacing="2">
-                                <Label Text="{Binding Summary.MonthlyEmiToIncomeRatio}" FontSize="28" FontAttributes="Bold" TextColor="#EF4444"/>
-                                <Label Text="%" FontSize="16" TextColor="Gray" VerticalOptions="End" Margin="0,0,0,4"/>
-                            </HorizontalStackLayout>
-                            <Label Text="Strained Threshold (>40%)" FontSize="10" TextColor="#F59E0B"/>
+                            <Label Text="{Binding Summary.MonthlyEmiToIncomeRatio, StringFormat='{0}%'}" FontSize="26" FontAttributes="Bold" TextColor="#EF4444"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
-                <!-- 3. Loan Manager Overview Card -->
-                <Label Text="Active Liabilities" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1E293B, Dark=#F1F5F9}"/>
-
-                <Border StrokeShape="RoundRectangle 8" Padding="20" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*" RowSpacing="15">
-
-                        <Label Grid.Row="0" Grid.Column="0" Text="Active Loans" TextColor="Gray" VerticalOptions="Center"/>
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Summary.ActiveLoansCount}" FontAttributes="Bold" HorizontalOptions="End" FontSize="16"/>
-
-                        <Label Grid.Row="1" Grid.Column="0" Text="Total Outstanding" TextColor="Gray" VerticalOptions="Center"/>
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Summary.TotalRemainingLoanAmount, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End" TextColor="#3B82F6" FontSize="16"/>
-
-                        <Label Grid.Row="2" Grid.Column="0" Text="Combined Monthly EMI" TextColor="Gray" VerticalOptions="Center"/>
-                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Summary.TotalUpcomingMonthlyEmi, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End" FontSize="16"/>
-
+                <!-- Accounts & Balance Summary -->
+                <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Total Bank Balance" FontSize="12" TextColor="Gray"/>
+                            <Label Text="{Binding Summary.TotalAccountBalance, StringFormat='₹{0:N2}'}" FontSize="18" FontAttributes="Bold" TextColor="#10B981"/>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="End">
+                            <Label Text="Linked Accounts" FontSize="12" TextColor="Gray"/>
+                            <Label Text="{Binding Summary.AccountsCount}" FontSize="18" FontAttributes="Bold" TextColor="#1E293B" HorizontalOptions="End"/>
+                        </VerticalStackLayout>
                     </Grid>
                 </Border>
 
-                <!-- 4. Credit Card Exposure Card -->
-                <Label Text="Credit Card Utilization" FontSize="16" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#1E293B, Dark=#F1F5F9}"/>
+                <!-- Liabilities Overview -->
+                <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*" RowSpacing="10">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Outstanding Loans" TextColor="Gray"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Summary.TotalRemainingLoanAmount, StringFormat='₹{0:N0}'}" FontAttributes="Bold" HorizontalOptions="End"/>
 
-                <Border StrokeShape="RoundRectangle 8" Padding="20" BackgroundColor="{AppThemeBinding Light=#F8FAFC, Dark=#151F32}">
-                    <VerticalStackLayout Spacing="12">
-                        <Grid ColumnDefinitions="*,*">
-                            <Label Grid.Column="0" Text="Total Outstanding" TextColor="Gray"/>
-                            <Label Grid.Column="1" Text="{Binding Summary.TotalOutstandingAmount, StringFormat='₹{0:N2}'}" FontAttributes="Bold" HorizontalOptions="End"/>
-                        </Grid>
-
-                        <!-- Progress Visual Representation Line -->
-                        <ProgressBar Progress="{Binding Summary.GlobalCreditUtilizationPercentage, Converter={StaticResource InvertedBoolConverter}}" ProgressColor="#F59E0B" HeightRequest="8"/>
-
-                        <Grid ColumnDefinitions="*,*">
-                            <HorizontalStackLayout Grid.Column="0" Spacing="4">
-                                <Label Text="Utilization Ratio:" FontSize="12" TextColor="Gray"/>
-                                <Label Text="{Binding Summary.GlobalCreditUtilizationPercentage, StringFormat='{0}%'}" FontSize="12" FontAttributes="Bold" TextColor="#F59E0B"/>
-                            </HorizontalStackLayout>
-                            <Label Grid.Column="1" Text="{Binding Summary.TotalCreditLimit, StringFormat='Limit: ₹{0:N0}'}" FontSize="12" TextColor="Gray" HorizontalOptions="End"/>
-                        </Grid>
-                    </VerticalStackLayout>
+                        <Label Grid.Row="1" Grid.Column="0" Text="Credit Outstanding" TextColor="Gray"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Summary.TotalOutstandingAmount, StringFormat='₹{0:N0}'}" FontAttributes="Bold" HorizontalOptions="End"/>
+                    </Grid>
                 </Border>
 
             </VerticalStackLayout>

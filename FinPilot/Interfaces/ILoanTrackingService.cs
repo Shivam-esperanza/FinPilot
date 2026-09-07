@@ -1,13 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+using FinPilot.Models;
 
 namespace FinPilot.Interfaces
 {
     public interface ILoanTrackingService
     {
-        // Iterates through active liabilities and catches up the balances based on elapsed time
+        Task<List<Loan>> GetUserLoansAsync(Guid userId);
+        Task<Loan> AddLoanAsync(Loan loan);
+        Task<Loan> UpdateLoanAsync(Loan loan);
+        Task<bool> DeleteLoanAsync(Guid loanId, Guid userId);
         Task AutoUpdateBalancesAsync(Guid userId);
     }
 }

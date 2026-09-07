@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             xmlns:models="clr-namespace:FinPilot.Models"
+             x:Class="FinPilot.Views.NotificationsPage"
+             x:DataType="viewmodels:NotificationsViewModel"
+             Title="Notifications"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="15" MaximumWidthRequest="550" HorizontalOptions="Center">
+
+            <Label Text="Financial Alerts and Reminders" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+
+            <CollectionView ItemsSource="{Binding Notifications}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Notification">
+                        <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+                                    <Label Text="{Binding Message}" FontSize="13" TextColor="#475569"/>
+                                    <Label Text="{Binding CreatedAt, StringFormat='{0:dd MMM yyyy HH:mm}'}" FontSize="11" TextColor="#94A3B8"/>
+                                </VerticalStackLayout>
+
+                                <Button Grid.Column="1" Text="Mark Read"
+                                        Command="{Binding BindingContext.MarkAsReadCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#512BD4" TextColor="#FFFFFF" HeightRequest="32" Padding="8,0"
+                                        VerticalOptions="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

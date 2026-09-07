@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             xmlns:models="clr-namespace:FinPilot.Models"
+             x:Class="FinPilot.Views.TransactionsPage"
+             x:DataType="viewmodels:TransactionsViewModel"
+             Title="Transaction History"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20" MaximumWidthRequest="550" HorizontalOptions="Center">
+
+            <Label Text="Transactions and Expenses" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+
+            <!-- Add Transaction Form -->
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Log New Transaction" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+
+                    <Entry Placeholder="Amount (₹)" Text="{Binding AmountText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Description (e.g., Amazon Purchase)" Text="{Binding Description, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Category (e.g., Shopping, LoanPayment, Fuel)" Text="{Binding Category, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <Label Text="Transaction Date" FontSize="12" TextColor="#64748B"/>
+                    <DatePicker Date="{Binding TransactionDate, Mode=TwoWay}" TextColor="#1E293B" BackgroundColor="#F1F5F9"/>
+
+                    <Button Text="Log Transaction" Command="{Binding AddTransactionCommand}" BackgroundColor="#512BD4" TextColor="#FFFFFF"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Error Banner -->
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+
+            <Label Text="Recent Activity" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
+
+            <!-- Transactions List -->
+            <CollectionView ItemsSource="{Binding Transactions}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transaction">
+                        <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                    <Label Text="{Binding Description}" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+                                    <Label Text="{Binding Category, StringFormat='Category: {0}'}" FontSize="12" TextColor="#64748B"/>
+                                    <Label Text="{Binding TransactionDate, StringFormat='{0:dd MMM yyyy HH:mm}'}" FontSize="12" TextColor="#94A3B8"/>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Margin="0,0,15,0">
+                                    <Label Text="{Binding Amount, StringFormat='₹{0:N2}'}" FontAttributes="Bold" FontSize="16" TextColor="#EF4444" HorizontalOptions="End"/>
+                                </VerticalStackLayout>
+
+                                <Button Grid.Column="2" Text="Delete"
+                                        Command="{Binding BindingContext.DeleteTransactionCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="36" Padding="10,0"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

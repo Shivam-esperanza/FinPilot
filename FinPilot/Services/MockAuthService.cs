@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +35,16 @@ namespace FinPilot.Services
                 return null;
             }
 
+            return await EnsureMockUserExistsAsync(email, "9876543210");
+        }
+
+        public async Task<User?> RegisterWithEmailAsync(string fullName, string email, string password, string phoneNumber = "", decimal monthlyIncome = 0, int creditScore = 750)
+        {
+            await Task.Delay(1000);
+            if (string.IsNullOrWhiteSpace(email) || !email.Contains("@") || password.Length < 6)
+            {
+                return null;
+            }
             return await EnsureMockUserExistsAsync(email, "9876543210");
         }
 

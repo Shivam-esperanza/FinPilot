@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -43,29 +43,94 @@ namespace FinPilot.Database
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Entity Relationships and Cascade/Restrict rules
+            // User Email Unique Index
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // Account Relationships
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.User)
-                .WithMany()
+                .WithMany(u => u.Accounts)
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Account>()
                 .HasOne(a => a.Bank)
-                .WithMany()
+                .WithMany(b => b.Accounts)
                 .HasForeignKey(a => a.BankId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Loan Relationships
             modelBuilder.Entity<Loan>()
                 .HasOne(l => l.User)
-                .WithMany()
+                .WithMany(u => u.Loans)
                 .HasForeignKey(l => l.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Loan>()
                 .HasOne(l => l.Bank)
-                .WithMany()
+                .WithMany(b => b.Loans)
                 .HasForeignKey(l => l.BankId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // CreditCard Relationships
+            modelBuilder.Entity<CreditCard>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.CreditCards)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CreditCard>()
+                .HasOne(c => c.Bank)
+                .WithMany(b => b.CreditCards)
+                .HasForeignKey(c => c.BankId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Transaction Relationships
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.User)
+                .WithMany(u => u.Transactions)
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Loan)
+                .WithMany()
+                .HasForeignKey(t => t.LoanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.CreditCard)
+                .WithMany()
+                .HasForeignKey(t => t.CreditCardId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Notification Relationships
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Offer Relationships
+            modelBuilder.Entity<Offer>()
+                .HasOne(o => o.Bank)
+                .WithMany()
+                .HasForeignKey(o => o.BankId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Recommendation Relationships
+            modelBuilder.Entity<Recommendation>()
+                .HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Recommendation>()
+                .HasOne(r => r.Bank)
+                .WithMany()
+                .HasForeignKey(r => r.BankId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

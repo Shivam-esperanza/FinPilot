@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:FinPilot.ViewModels"
+             x:Class="FinPilot.Views.ProfilePage"
+             x:DataType="viewmodels:ProfileViewModel"
+             Title="My Profile"
+             BackgroundColor="#FFFFFF">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="15" MaximumWidthRequest="500" HorizontalOptions="Center">
+
+            <Label Text="User Profile and Settings" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Personal Information" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+
+                    <Label Text="Email Address (Login ID)" FontSize="12" TextColor="#64748B"/>
+                    <Entry Text="{Binding Email}" IsReadOnly="True" BackgroundColor="#E2E8F0" TextColor="#475569"/>
+
+                    <Label Text="Full Name" FontSize="12" TextColor="#64748B"/>
+                    <Entry Text="{Binding FullName, Mode=TwoWay}" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <Label Text="Phone Number" FontSize="12" TextColor="#64748B"/>
+                    <Entry Text="{Binding PhoneNumber, Mode=TwoWay}" Keyboard="Telephone" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <Label Text="Monthly Income (₹)" FontSize="12" TextColor="#64748B"/>
+                    <Entry Text="{Binding MonthlyIncomeText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+
+                    <Label Text="Credit Score (300-900)" FontSize="12" TextColor="#64748B"/>
+                    <Entry Text="{Binding CreditScoreText, Mode=TwoWay}" Keyboard="Numeric" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F8FAFC">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Change Password (Optional)" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
+
+                    <Entry Placeholder="Current Password" Text="{Binding CurrentPassword, Mode=TwoWay}" IsPassword="True" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="New Password" Text="{Binding NewPassword, Mode=TwoWay}" IsPassword="True" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                    <Entry Placeholder="Confirm New Password" Text="{Binding ConfirmNewPassword, Mode=TwoWay}" IsPassword="True" TextColor="#1E293B" PlaceholderColor="#64748B" BackgroundColor="#F1F5F9"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+            <Label Text="{Binding SuccessMessage}" TextColor="#10B981" FontSize="14" FontAttributes="Bold" HorizontalOptions="Center"/>
+
+            <Button Text="Save Profile Changes" Command="{Binding UpdateProfileCommand}" BackgroundColor="#512BD4" TextColor="#FFFFFF" HeightRequest="48"/>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
