@@ -6,35 +6,70 @@
              x:Class="FinPilot.Views.BankOffersPage"
              x:DataType="viewmodels:BankOffersViewModel"
              Title="Partner Bank Offers"
-             BackgroundColor="#FFFFFF">
+             BackgroundColor="#F8FAFC">
 
     <ScrollView Padding="20">
-        <VerticalStackLayout Spacing="15" MaximumWidthRequest="550" HorizontalOptions="Center">
+        <VerticalStackLayout Spacing="15" MaximumWidthRequest="600" HorizontalOptions="Center">
 
-            <Label Text="Partner Bank Offers and Deals" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
-            <Label Text="* Demo/partner promotional datasets stored locally" FontSize="12" TextColor="Gray"/>
+            <!-- Page Title Header -->
+            <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,5">
+                <VerticalStackLayout Grid.Column="0">
+                    <Label Text="Live Bank Offers &amp; Deals" FontSize="24" FontAttributes="Bold" TextColor="#512BD4"/>
+                    <Label Text="{Binding LastSyncedTimeText}" FontSize="12" TextColor="#64748B"/>
+                </VerticalStackLayout>
 
-            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
+                <Button Grid.Column="1"
+                        Text="🔄 Refresh Offers"
+                        Command="{Binding RefreshOffersCommand}"
+                        BackgroundColor="#512BD4"
+                        TextColor="White"
+                        CornerRadius="8"
+                        FontAttributes="Bold"
+                        Padding="12,8"
+                        HeightRequest="42"/>
+            </Grid>
 
-            <CollectionView ItemsSource="{Binding Offers}">
-                <CollectionView.ItemTemplate>
+            <!-- Status Banner -->
+            <Border StrokeShape="RoundRectangle 8" Padding="12,10" BackgroundColor="#EEF2FF" Stroke="#C7D2FE">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="🌐 Live Internet Offer Sync" FontAttributes="Bold" FontSize="13" TextColor="#3730A3"/>
+                        <Label Text="{Binding SyncStatusMessage}" FontSize="12" TextColor="#4338CA"/>
+                    </VerticalStackLayout>
+                    <ActivityIndicator Grid.Column="1" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="#512BD4" HeightRequest="24" WidthRequest="24"/>
+                </Grid>
+            </Border>
+
+            <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="13" HorizontalOptions="Center" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBoolConverter}, FallbackValue=False}"/>
+
+            <!-- Offers List -->
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Offers}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Offer">
-                        <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
-                            <VerticalStackLayout Spacing="6">
+                        <Border StrokeShape="RoundRectangle 12" Padding="16" Margin="0,6" BackgroundColor="#FFFFFF" Stroke="#E2E8F0">
+                            <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <Label Grid.Column="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="16" TextColor="#1E293B"/>
-                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 4" Padding="6,2" BackgroundColor="#512BD4">
+                                    <Label Grid.Column="0" Text="{Binding Title}" FontAttributes="Bold" FontSize="16" TextColor="#0F172A"/>
+                                    <Border Grid.Column="1" StrokeShape="RoundRectangle 6" Padding="8,4" BackgroundColor="#512BD4">
                                         <Label Text="{Binding OfferType}" FontSize="11" TextColor="#FFFFFF" FontAttributes="Bold"/>
                                     </Border>
                                 </Grid>
 
-                                <Label Text="{Binding Description}" FontSize="13" TextColor="#475569"/>
-                                <Label Text="{Binding ExpiryDate, StringFormat='Expires: {0:dd MMM yyyy}'}" FontSize="11" TextColor="#F59E0B"/>
+                                <Label Text="{Binding Description}" FontSize="13" TextColor="#475569" LineBreakMode="WordWrap"/>
+
+                                <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                    <HorizontalStackLayout Grid.Column="0" Spacing="6">
+                                        <Label Text="🏦 Partner Bank:" FontSize="12" TextColor="#64748B" FontAttributes="Bold"/>
+                                        <Label Text="{Binding Bank.Name, FallbackValue='Partner Bank'}" FontSize="12" TextColor="#1E293B" FontAttributes="Bold"/>
+                                    </HorizontalStackLayout>
+
+                                    <Label Grid.Column="1" Text="{Binding ExpiryDate, StringFormat='Expires: {0:dd MMM yyyy}'}" FontSize="11" TextColor="#D97706" FontAttributes="Bold"/>
+                                </Grid>
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

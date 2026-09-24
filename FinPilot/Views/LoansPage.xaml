@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.LoansPage"
              x:DataType="viewmodels:LoansViewModel"
+             x:Name="LoansPageRoot"
              Title="Active Loans"
              BackgroundColor="#FFFFFF">
 
@@ -46,8 +47,8 @@
             <Label Text="Your Active Loan Accounts" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
 
             <!-- Loans List -->
-            <CollectionView ItemsSource="{Binding Loans}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Loans}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Loan">
                         <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
                             <Grid ColumnDefinitions="*,Auto,Auto">
@@ -65,14 +66,14 @@
                                 </VerticalStackLayout>
 
                                 <Button Grid.Column="2" Text="Delete"
-                                        Command="{Binding BindingContext.DeleteLoanCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding BindingContext.DeleteLoanCommand, Source={x:Reference LoansPageRoot}}"
                                         CommandParameter="{Binding .}"
                                         BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="36" Padding="10,0"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

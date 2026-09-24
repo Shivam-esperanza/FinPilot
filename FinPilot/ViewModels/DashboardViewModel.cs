@@ -2,14 +2,16 @@ using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls;
 using FinPilot.Interfaces;
+using FinPilot.Messages;
 using FinPilot.Models;
 
 namespace FinPilot.ViewModels
 {
-    public partial class DashboardViewModel : ObservableObject
+    public partial class DashboardViewModel : ObservableObject, IRecipient<TransactionChangedMessage>
     {
         private readonly IDashboardService _dashboardService;
         private readonly ILoanTrackingService _loanTrackingService;
@@ -42,6 +44,16 @@ namespace FinPilot.ViewModels
             _syncRepository = syncRepository ?? throw new ArgumentNullException(nameof(syncRepository));
             _sessionService = sessionService ?? throw new ArgumentNullException(nameof(sessionService));
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+
+            WeakReferenceMessenger.Default.Register(this);
+        }
+
+        public void Receive(TransactionChangedMessage message)
+        {
+            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await LoadDashboardDataAsync();
+            });
         }
 
         public void Initialize(Guid userId)

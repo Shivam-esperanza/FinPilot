@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.PurchaseAdvisorPage"
              x:DataType="viewmodels:PurchaseAdvisorViewModel"
+             x:Name="PurchaseAdvisorPageRoot"
              Title="Smart Purchase Advisor"
              BackgroundColor="#FFFFFF">
 
@@ -34,7 +35,7 @@
 
             <!-- AI Advisory Banner -->
             <Border StrokeShape="RoundRectangle 8" Padding="15" BackgroundColor="#F0FDF4" Stroke="#10B981"
-                    IsVisible="{Binding AiExplanation, Converter={StaticResource InvertedBoolConverter}}">
+                    IsVisible="{Binding AiExplanation, Converter={StaticResource StringToBoolConverter}, FallbackValue=False}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="AI Assistant Advisory Explanation" FontAttributes="Bold" FontSize="14" TextColor="#065F46"/>
                     <Label Text="{Binding AiExplanation}" FontSize="13" TextColor="#047857"/>
@@ -43,8 +44,8 @@
 
             <!-- Results Output -->
             <Label Text="Ranked Financing Recommendations" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
-            <CollectionView ItemsSource="{Binding Results}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Results}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:AdvisorOption">
                         <Border StrokeShape="RoundRectangle 12" Margin="0,0,0,15" Padding="15" Stroke="#10B981" BackgroundColor="#F1F5F9">
                             <VerticalStackLayout Spacing="8">
@@ -65,8 +66,8 @@
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

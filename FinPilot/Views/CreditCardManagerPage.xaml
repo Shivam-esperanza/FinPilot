@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.CreditCardManagerPage"
              x:DataType="viewmodels:CreditCardManagerViewModel"
+             x:Name="CreditCardPageRoot"
              Title="Credit Card Manager"
              BackgroundColor="#FFFFFF">
 
@@ -44,8 +45,8 @@
             <Label Text="Your Active Credit Cards" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
 
             <!-- Cards Collection -->
-            <CollectionView ItemsSource="{Binding Cards}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Cards}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:CreditCard">
                         <Border StrokeShape="RoundRectangle 12" Margin="0,0,0,15" Padding="20" BackgroundColor="#F8FAFC">
                             <VerticalStackLayout Spacing="12">
@@ -57,7 +58,7 @@
                                     </VerticalStackLayout>
                                     <Label Grid.Column="1" Text="{Binding LastFourDigits, StringFormat='•••• {0}'}" FontSize="14" TextColor="Gray" Margin="0,0,10,0"/>
                                     <Button Grid.Column="2" Text="Delete"
-                                            Command="{Binding BindingContext.DeleteCardCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                            Command="{Binding BindingContext.DeleteCardCommand, Source={x:Reference CreditCardPageRoot}}"
                                             CommandParameter="{Binding .}"
                                             BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="32" Padding="8,0"/>
                                 </Grid>
@@ -83,8 +84,8 @@
                             </VerticalStackLayout>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

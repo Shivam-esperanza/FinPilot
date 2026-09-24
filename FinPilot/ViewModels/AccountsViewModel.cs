@@ -3,15 +3,18 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using FinPilot.Interfaces;
+using FinPilot.Messages;
 using FinPilot.Models;
 
 namespace FinPilot.ViewModels
 {
-    public partial class AccountsViewModel : ObservableObject
+    public partial class AccountsViewModel : ObservableObject, IRecipient<TransactionChangedMessage>
     {
         private readonly IAccountService _accountService;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private ObservableCollection<Account> _accounts = new();
@@ -40,10 +43,24 @@ namespace FinPilot.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
-        public AccountsViewModel(IAccountService accountService, IUserSessionService sessionService)
+        public AccountsViewModel(
+            IAccountService accountService,
+            IUserSessionService sessionService,
+            IAuthenticationService authService)
         {
             _accountService = accountService;
             _sessionService = sessionService;
+            _authService = authService;
+
+            WeakReferenceMessenger.Default.Register(this);
+        }
+
+        public void Receive(TransactionChangedMessage message)
+        {
+            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await LoadAccountsAsync();
+            });
         }
 
         [RelayCommand]
@@ -57,6 +74,15 @@ namespace FinPilot.ViewModels
                 ErrorMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty) return;
 
                 var banksList = await _accountService.GetAvailableBanksAsync();

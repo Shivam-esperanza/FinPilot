@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.TransactionsPage"
              x:DataType="viewmodels:TransactionsViewModel"
+             x:Name="TransactionsPageRoot"
              Title="Transaction History"
              BackgroundColor="#FFFFFF">
 
@@ -35,8 +36,8 @@
             <Label Text="Recent Activity" FontSize="18" FontAttributes="Bold" TextColor="#1E293B"/>
 
             <!-- Transactions List -->
-            <CollectionView ItemsSource="{Binding Transactions}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Transactions}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Transaction">
                         <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
                             <Grid ColumnDefinitions="*,Auto,Auto">
@@ -51,14 +52,14 @@
                                 </VerticalStackLayout>
 
                                 <Button Grid.Column="2" Text="Delete"
-                                        Command="{Binding BindingContext.DeleteTransactionCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding BindingContext.DeleteTransactionCommand, Source={x:Reference TransactionsPageRoot}}"
                                         CommandParameter="{Binding .}"
                                         BackgroundColor="#EF4444" TextColor="#FFFFFF" HeightRequest="36" Padding="10,0"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

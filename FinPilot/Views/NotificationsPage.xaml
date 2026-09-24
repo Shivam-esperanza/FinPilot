@@ -5,6 +5,7 @@
              xmlns:models="clr-namespace:FinPilot.Models"
              x:Class="FinPilot.Views.NotificationsPage"
              x:DataType="viewmodels:NotificationsViewModel"
+             x:Name="NotificationsPageRoot"
              Title="Notifications"
              BackgroundColor="#FFFFFF">
 
@@ -15,8 +16,8 @@
 
             <Label Text="{Binding ErrorMessage}" TextColor="#EF4444" FontSize="14" HorizontalOptions="Center"/>
 
-            <CollectionView ItemsSource="{Binding Notifications}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Notifications}">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="models:Notification">
                         <Border StrokeShape="RoundRectangle 8" Padding="15" Margin="0,5" BackgroundColor="#F1F5F9">
                             <Grid ColumnDefinitions="*,Auto">
@@ -27,15 +28,15 @@
                                 </VerticalStackLayout>
 
                                 <Button Grid.Column="1" Text="Mark Read"
-                                        Command="{Binding BindingContext.MarkAsReadCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding BindingContext.MarkAsReadCommand, Source={x:Reference NotificationsPageRoot}}"
                                         CommandParameter="{Binding .}"
                                         BackgroundColor="#512BD4" TextColor="#FFFFFF" HeightRequest="32" Padding="8,0"
                                         VerticalOptions="Center"/>
                             </Grid>
                         </Border>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
         </VerticalStackLayout>
     </ScrollView>

@@ -3,15 +3,18 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using FinPilot.Interfaces;
+using FinPilot.Messages;
 using FinPilot.Models;
 
 namespace FinPilot.ViewModels
 {
-    public partial class TransactionsViewModel : ObservableObject
+    public partial class TransactionsViewModel : ObservableObject, IRecipient<TransactionChangedMessage>
     {
         private readonly ITransactionService _txnService;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private ObservableCollection<Transaction> _transactions = new();
@@ -34,10 +37,21 @@ namespace FinPilot.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
-        public TransactionsViewModel(ITransactionService txnService, IUserSessionService sessionService)
+        public TransactionsViewModel(ITransactionService txnService, IUserSessionService sessionService, IAuthenticationService authService)
         {
             _txnService = txnService;
             _sessionService = sessionService;
+            _authService = authService;
+
+            WeakReferenceMessenger.Default.Register(this);
+        }
+
+        public void Receive(TransactionChangedMessage message)
+        {
+            Microsoft.Maui.ApplicationModel.MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await LoadTransactionsAsync();
+            });
         }
 
         [RelayCommand]
@@ -51,6 +65,15 @@ namespace FinPilot.ViewModels
                 ErrorMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty) return;
 
                 var userTxns = await _txnService.GetUserTransactionsAsync(userId);
@@ -77,7 +100,20 @@ namespace FinPilot.ViewModels
                 ErrorMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
-                if (userId == Guid.Empty) return;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
+                if (userId == Guid.Empty)
+                {
+                    ErrorMessage = "Please log in to add transactions.";
+                    return;
+                }
 
                 if (!decimal.TryParse(AmountText, out decimal amount) || amount <= 0)
                 {
@@ -108,6 +144,9 @@ namespace FinPilot.ViewModels
 
                 IsBusy = false;
                 await LoadTransactionsAsync();
+
+                // Broadcast real-time balance update to Dashboard, Accounts, and Credit Card ViewModels
+                WeakReferenceMessenger.Default.Send(new TransactionChangedMessage(userId));
             }
             catch (Exception ex)
             {
@@ -124,11 +163,37 @@ namespace FinPilot.ViewModels
         {
             if (transaction == null) return;
             Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
-
-            bool success = await _txnService.DeleteTransactionAsync(transaction.Id, userId);
-            if (success)
+            if (userId == Guid.Empty)
             {
-                Transactions.Remove(transaction);
+                var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                if (currentUser != null)
+                {
+                    userId = currentUser.Id;
+                }
+            }
+
+            if (userId == Guid.Empty)
+            {
+                ErrorMessage = "Please log in to delete transactions.";
+                return;
+            }
+
+            try
+            {
+                bool success = await _txnService.DeleteTransactionAsync(transaction.Id, userId);
+                if (success)
+                {
+                    Transactions.Remove(transaction);
+                    WeakReferenceMessenger.Default.Send(new TransactionChangedMessage(userId));
+                }
+                else
+                {
+                    ErrorMessage = "Failed to delete transaction. Please refresh and try again.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error deleting transaction: {ex.Message}";
             }
         }
     }

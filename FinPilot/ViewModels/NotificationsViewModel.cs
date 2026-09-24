@@ -12,6 +12,7 @@ namespace FinPilot.ViewModels
     {
         private readonly INotificationManagerService _notificationService;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private ObservableCollection<Notification> _notifications = new();
@@ -22,10 +23,14 @@ namespace FinPilot.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
-        public NotificationsViewModel(INotificationManagerService notificationService, IUserSessionService sessionService)
+        public NotificationsViewModel(
+            INotificationManagerService notificationService,
+            IUserSessionService sessionService,
+            IAuthenticationService authService)
         {
             _notificationService = notificationService;
             _sessionService = sessionService;
+            _authService = authService;
         }
 
         [RelayCommand]
@@ -39,6 +44,15 @@ namespace FinPilot.ViewModels
                 ErrorMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty) return;
 
                 await _notificationService.RunBackgroundAuditAsync(userId);

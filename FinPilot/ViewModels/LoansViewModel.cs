@@ -13,6 +13,7 @@ namespace FinPilot.ViewModels
         private readonly ILoanTrackingService _loanService;
         private readonly IAccountService _accountService;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private ObservableCollection<Loan> _loans = new();
@@ -53,11 +54,13 @@ namespace FinPilot.ViewModels
         public LoansViewModel(
             ILoanTrackingService loanService,
             IAccountService accountService,
-            IUserSessionService sessionService)
+            IUserSessionService sessionService,
+            IAuthenticationService authService)
         {
             _loanService = loanService;
             _accountService = accountService;
             _sessionService = sessionService;
+            _authService = authService;
         }
 
         [RelayCommand]
@@ -71,6 +74,15 @@ namespace FinPilot.ViewModels
                 ErrorMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty) return;
 
                 var banksList = await _accountService.GetAvailableBanksAsync();

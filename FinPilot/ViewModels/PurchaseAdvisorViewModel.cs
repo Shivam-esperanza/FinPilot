@@ -16,6 +16,7 @@ namespace FinPilot.ViewModels
         private readonly IAssistantService _assistantService;
         private readonly AppDbContext _dbContext;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private string _productName = string.Empty;
@@ -45,12 +46,14 @@ namespace FinPilot.ViewModels
             IRecommendationEngine engine,
             IAssistantService assistantService,
             AppDbContext dbContext,
-            IUserSessionService sessionService)
+            IUserSessionService sessionService,
+            IAuthenticationService authService)
         {
             _engine = engine;
             _assistantService = assistantService;
             _dbContext = dbContext;
             _sessionService = sessionService;
+            _authService = authService;
         }
 
         [RelayCommand]
@@ -66,6 +69,15 @@ namespace FinPilot.ViewModels
                 Results.Clear();
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty)
                 {
                     ErrorMessage = "User session invalid. Please log in.";

@@ -14,6 +14,7 @@ namespace FinPilot.ViewModels
     {
         private readonly AppDbContext _dbContext;
         private readonly IUserSessionService _sessionService;
+        private readonly IAuthenticationService _authService;
 
         [ObservableProperty]
         private string _fullName = string.Empty;
@@ -48,10 +49,11 @@ namespace FinPilot.ViewModels
         [ObservableProperty]
         private string _successMessage = string.Empty;
 
-        public ProfileViewModel(AppDbContext dbContext, IUserSessionService sessionService)
+        public ProfileViewModel(AppDbContext dbContext, IUserSessionService sessionService, IAuthenticationService authService)
         {
             _dbContext = dbContext;
             _sessionService = sessionService;
+            _authService = authService;
         }
 
         [RelayCommand]
@@ -66,6 +68,15 @@ namespace FinPilot.ViewModels
                 SuccessMessage = string.Empty;
 
                 Guid userId = _sessionService.CurrentUserId ?? Guid.Empty;
+                if (userId == Guid.Empty)
+                {
+                    var currentUser = await _authService.GetCurrentCurrentUserAsync();
+                    if (currentUser != null)
+                    {
+                        userId = currentUser.Id;
+                    }
+                }
+
                 if (userId == Guid.Empty) return;
 
                 var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);

@@ -29,6 +29,7 @@ namespace FinPilot
             builder.Services.AddDbContext<AppDbContext>(ServiceLifetime.Transient);
 
             // Core Application Services & Interfaces
+            builder.Services.AddSingleton<System.Net.Http.HttpClient>();
             builder.Services.AddSingleton<IUserSessionService, UserSessionService>();
             builder.Services.AddTransient<IAuthenticationService, AuthenticationService>();
             builder.Services.AddTransient<IAccountService, AccountService>();
@@ -95,6 +96,10 @@ namespace FinPilot
                 {
                     // Column already exists or table created cleanly by EnsureCreated
                 }
+
+                // Force seed Bank Offers catalog on app startup
+                var offerService = services.GetRequiredService<IBankOfferService>();
+                Task.Run(async () => await offerService.GetActiveMarketOffersAsync()).Wait();
             }
             catch (Exception ex)
             {

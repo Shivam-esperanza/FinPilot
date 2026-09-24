@@ -11,11 +11,13 @@ namespace FinPilot.Services
     {
         private readonly AppDbContext _dbContext;
         private readonly IUserSessionService _sessionService;
+        private readonly IBankOfferService _bankOfferService;
 
-        public AuthenticationService(AppDbContext dbContext, IUserSessionService sessionService)
+        public AuthenticationService(AppDbContext dbContext, IUserSessionService sessionService, IBankOfferService bankOfferService)
         {
             _dbContext = dbContext;
             _sessionService = sessionService;
+            _bankOfferService = bankOfferService;
         }
 
         public async Task<bool> IsUserLoggedInAsync()
@@ -251,9 +253,10 @@ namespace FinPilot.Services
             }
 
             bool hasCards = await _dbContext.CreditCards.AnyAsync(c => c.UserId == userId);
+            CreditCard? mockCard = null;
             if (!hasCards)
             {
-                var mockCard = new CreditCard
+                mockCard = new CreditCard
                 {
                     Id = Guid.NewGuid(),
                     UserId = userId,
@@ -273,8 +276,80 @@ namespace FinPilot.Services
                 };
                 await _dbContext.CreditCards.AddAsync(mockCard);
             }
+            else
+            {
+                mockCard = await _dbContext.CreditCards.FirstOrDefaultAsync(c => c.UserId == userId);
+            }
+
+            int txnCapacity = await _dbContext.Transactions.CountAsync(t => t.UserId == userId);
+            if (txnCapacity < 5)
+            {
+                var initialTransactions = new List<Transaction>
+                {
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        Amount = 125000.00m,
+                        Description = "Monthly Salary Credit - Tech Corp",
+                        Category = "Salary",
+                        TransactionDate = DateTime.UtcNow.AddDays(-2)
+                    },
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        CreditCardId = mockCard?.Id,
+                        Amount = 15000.00m,
+                        Description = "ICICI Credit Card Bill Payment",
+                        Category = "Utilities",
+                        TransactionDate = DateTime.UtcNow.AddDays(-5)
+                    },
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        CreditCardId = mockCard?.Id,
+                        Amount = 4999.00m,
+                        Description = "Reliance Digital Tech Accessories",
+                        Category = "Shopping",
+                        TransactionDate = DateTime.UtcNow.AddDays(-8)
+                    },
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        Amount = 2500.00m,
+                        Description = "HP Fuel Station Auto-Refill",
+                        Category = "Fuel",
+                        TransactionDate = DateTime.UtcNow.AddDays(-10)
+                    },
+                    new Transaction
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        CreditCardId = mockCard?.Id,
+                        Amount = 650.00m,
+                        Description = "Swiggy Weekend Dining Order",
+                        Category = "Shopping",
+                        TransactionDate = DateTime.UtcNow.AddDays(-12)
+                    }
+                };
+
+                await _dbContext.Transactions.AddRangeAsync(initialTransactions);
+            }
 
             await _dbContext.SaveChangesAsync();
+
+            // Sync live bank promotional offers from the internet on login / account initialization
+            try
+            {
+                await _bankOfferService.SyncLatestOffersFromInternetAsync();
+            }
+            catch
+            {
+                // Fallback gracefully if offline or network unreachable
+            }
         }
     }
 }
