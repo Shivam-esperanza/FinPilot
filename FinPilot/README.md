@@ -47,6 +47,35 @@
 
 ---
 
+## 📱 Screenshots
+
+<div align="center">
+  <table border="0">
+    <tr>
+      <td align="center" valign="top" width="30%">
+        <b>Authentication</b><br/><br/>
+        <img src="docs/images/login_screen.png" alt="FinPilot Login Screen" width="280"/>
+      </td>
+      <td align="center" valign="top" width="35%">
+        <b>Financial Overview</b><br/><br/>
+        <img src="docs/images/dashboard_screen.png" alt="FinPilot Main Dashboard" width="280"/>
+      </td>
+      <td align="center" valign="top" width="35%">
+        <b>Partner Deals & Offers</b><br/><br/>
+        <img src="docs/images/bank_offers_screen.png" alt="Partner Bank Offers" width="360"/>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 📐 Overall Architecture & Workflow
+
+![FinPilot Architecture & Workflow](docs/images/architecture_workflow.png)
+
+---
+
 ## 🛠️ Tech Stack & Architecture
 
 - **UI Framework**: [.NET 10 MAUI](https://dotnet.microsoft.com/en-us/apps/maui) (Single codebase targeting Android, iOS, macOS, Windows)
@@ -62,6 +91,8 @@
 
 ```text
 FinPilot/
+├── docs/              # Architecture diagrams & app screenshots
+│   └── images/        # Screenshot assets and system workflows
 ├── Converters/        # XAML value converters (e.g., IntToBoolConverter)
 ├── Database/          # EF Core AppDbContext & migration helpers
 ├── Interfaces/        # Service abstractions (IAccountService, ILoanTrackingService, etc.)
